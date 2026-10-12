@@ -9,20 +9,34 @@ import type {
 } from './types';
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL ?? 'https://api.mockmerce.com.br/v1';
+const API_KEY = process.env.EXPO_PUBLIC_API_KEY;
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
+  const headers: HeadersInit = {
+    Accept: 'application/json',
+    ...(API_KEY ? { 'X-API-Key': API_KEY } : {}),
+    ...(options?.body instanceof FormData ? {} : { 'Content-Type': 'application/json' }),
+    ...options?.headers,
+  };
+
   const response = await fetch(`${API_URL}${path}`, {
-    headers: {
-      Accept: 'application/json',
-      ...(options?.body instanceof FormData ? {} : { 'Content-Type': 'application/json' }),
-      ...options?.headers,
-    },
+    headers,
     ...options,
   });
 
   if (!response.ok) {
     const message = await response.text();
-    throw new Error(message || `Erro ${response.status} na API`);
+    let detail = message;
+    try {
+      const parsed = JSON.parse(message) as { error?: { message?: string }; message?: string };
+      detail = parsed.error?.message ?? parsed.message ?? message;
+    } catch {
+      detail = message;
+    }
+    if (response.status === 401) {
+      throw new Error('Autenticação ausente. Configure EXPO_PUBLIC_API_KEY no arquivo .env.');
+    }
+    throw new Error(detail || `Erro ${response.status} na API`);
   }
 
   return response.json() as Promise<T>;

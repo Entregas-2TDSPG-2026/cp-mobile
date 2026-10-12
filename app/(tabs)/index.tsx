@@ -16,7 +16,7 @@ export default function HomeScreen() {
     return <View style={styles.center}><Skeleton width="80%" height={28} /><Skeleton width="90%" height={90} /><Skeleton width="90%" height={90} /></View>;
   }
   if (products.isError) {
-    return <View style={styles.center}><Text style={styles.error}>Não foi possível carregar os produtos.</Text><Text>{products.error.message}</Text></View>;
+    return <View style={styles.center}><Text style={styles.error}>Não foi possível carregar os produtos.</Text><Text style={styles.errorDetail}>{products.error.message}</Text><Text style={styles.setup}>Crie um arquivo .env a partir do .env.example e informe a chave X-API-Key do painel da turma.</Text></View>;
   }
 
   return (
@@ -78,4 +78,6 @@ const styles = StyleSheet.create({
   rating: { color: '#b54708', fontSize: 13, fontWeight: '600' },
   empty: { color: appColors.muted, textAlign: 'center', padding: 24 },
   error: { color: appColors.danger, fontWeight: '700' },
+  errorDetail: { color: appColors.muted, textAlign: 'center' },
+  setup: { color: appColors.text, backgroundColor: appColors.softAccent, padding: 14, borderRadius: 14, textAlign: 'center', lineHeight: 20 },
 });

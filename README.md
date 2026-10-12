@@ -6,7 +6,7 @@ Aplicativo React Native com Expo Router para o Checkpoint 5.
 
 1. Instale Node.js LTS.
 2. Execute `npm install`.
-3. Copie `.env.example` para `.env` e ajuste `EXPO_PUBLIC_API_URL` se necessário.
+3. Copie `.env.example` para `.env`, informe `EXPO_PUBLIC_API_KEY` com a chave X-API-Key do painel da turma e ajuste `EXPO_PUBLIC_API_URL` se necessário.
 4. Execute `npx expo start`.
 
 O projeto usa Expo SDK 54, React Native 0.81.5 e Reanimated 4.
@@ -25,7 +25,7 @@ O projeto usa Expo SDK 54, React Native 0.81.5 e Reanimated 4.
 
 ## Dados esperados da API
 
-Cadastre no painel pelo menos três pontos de retirada, a localização da loja, um produto comprável e um pedido concluído para liberar avaliações. Os endpoints utilizados estão centralizados em `src/api/client.ts`.
+Cadastre no painel pelo menos três pontos de retirada, a localização da loja, um produto comprável e um pedido concluído para liberar avaliações. Os endpoints utilizados estão centralizados em `src/api/client.ts`. A API exige autenticação; a chave deve ficar apenas no `.env` local e nunca ser commitada.
 
 ## Movimento
 
