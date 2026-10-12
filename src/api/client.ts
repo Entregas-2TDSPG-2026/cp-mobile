@@ -11,6 +11,40 @@ import type {
 const API_URL = process.env.EXPO_PUBLIC_API_URL ?? 'https://api.mockmerce.com.br/v1';
 const API_KEY = process.env.EXPO_PUBLIC_API_KEY;
 
+type ProductListResponse = {
+  data: {
+    id: string;
+    name: string;
+    description?: string;
+    priceFrom?: number;
+    image?: string;
+    rating?: { average: number; count: number };
+  }[];
+};
+
+type ProductDetailResponse = {
+  id: string;
+  name: string;
+  description?: string;
+  rating?: { average: number; count: number };
+  images?: { url?: string; src?: string }[];
+  variants?: { price?: number; active?: boolean; isDefault?: boolean; images?: { url?: string; src?: string }[] }[];
+};
+
+function normalizeProduct(product: ProductListResponse['data'][number] | ProductDetailResponse): Product {
+  const detail = product as ProductDetailResponse;
+  const variant = detail.variants?.find((item) => item.active !== false && item.isDefault) ?? detail.variants?.find((item) => item.active !== false);
+  const image = detail.images?.[0] ?? variant?.images?.[0];
+  return {
+    id: product.id,
+    name: product.name,
+    description: product.description,
+    price: 'priceFrom' in product ? product.priceFrom ?? 0 : variant?.price ?? 0,
+    imageUrl: 'image' in product ? product.image : image?.url ?? image?.src,
+    rating: product.rating,
+  };
+}
+
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
   const headers: HeadersInit = {
     Accept: 'application/json',
@@ -43,9 +77,15 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
 }
 
 export const api = {
-  products: () => request<Product[]>('/products'),
-  product: (id: string) => request<Product>(`/products/${id}`),
-  reviews: (id: string) => request<Review[]>(`/products/${id}/reviews`),
+  products: async () => {
+    const response = await request<ProductListResponse>('/products');
+    return response.data.map(normalizeProduct);
+  },
+  product: async (id: string) => normalizeProduct(await request<ProductDetailResponse>(`/products/${id}`)),
+  reviews: async (id: string) => {
+    const response = await request<{ data: Review[] }>(`/products/${id}/reviews`);
+    return response.data;
+  },
   canReview: (id: string) => request<CanReview>(`/products/${id}/reviews/can-review`),
   upload: async (uri: string) => {
     const form = new FormData();
@@ -57,13 +97,17 @@ export const api = {
       method: 'POST',
       body: JSON.stringify(payload),
     }),
-  pickupPoints: (location?: { latitude: number; longitude: number }) => {
+  pickupPoints: async (location?: { latitude: number; longitude: number }) => {
     const query = location ? `?latitude=${location.latitude}&longitude=${location.longitude}` : '';
-    return request<PickupPoint[]>(`/pickup-points${query}`);
+    const response = await request<{ data: PickupPoint[] }>(`/pickup-points${query}`);
+    return response.data;
   },
   storeLocation: () => request<StoreLocation>('/store/location'),
   checkout: (payload: { productId: string; quantity: number; pickupPointId?: string }) =>
     request<Order>('/orders/checkout', { method: 'POST', body: JSON.stringify(payload) }),
   orders: () => request<Order[]>('/orders'),
-  pushMessages: () => request<PushMessage[]>('/push/messages'),
+  pushMessages: async () => {
+    const response = await request<{ data: PushMessage[] }>('/push/messages');
+    return response.data;
+  },
 };
