@@ -1,19 +1,19 @@
-const tintColorLight = '#2f95dc';
-const tintColorDark = '#fff';
+const tintColorLight = '#6d5dfc';
+const tintColorDark = '#ffffff';
 
 export default {
   light: {
-    text: '#000',
-    background: '#fff',
+    text: '#17152b',
+    background: '#f6f5fb',
     tint: tintColorLight,
-    tabIconDefault: '#ccc',
+    tabIconDefault: '#aaa7bb',
     tabIconSelected: tintColorLight,
   },
   dark: {
     text: '#fff',
-    background: '#000',
+    background: '#121020',
     tint: tintColorDark,
-    tabIconDefault: '#ccc',
+    tabIconDefault: '#77738d',
     tabIconSelected: tintColorDark,
   },
 };

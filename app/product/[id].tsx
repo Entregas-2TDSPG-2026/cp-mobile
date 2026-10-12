@@ -20,6 +20,7 @@ export default function ProductScreen() {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       {item.imageUrl ? <Image source={{ uri: item.imageUrl }} style={styles.hero} /> : null}
+      <View style={styles.productTag}><Text style={styles.productTagText}>SELEÇÃO DA LOJA</Text></View>
       <Text style={styles.title}>{item.name}</Text>
       <PressableScale style={styles.favorite} onPress={() => { setFavorite((value) => !value); Alert.alert(favorite ? 'Removido dos favoritos' : 'Adicionado aos favoritos'); }}>
         <Text style={styles.favoriteText}>{favorite ? '♥ Favoritado' : '♡ Favoritar'}</Text>
@@ -36,16 +37,18 @@ export default function ProductScreen() {
 const styles = StyleSheet.create({
   container: { padding: 20, gap: 16, backgroundColor: appColors.background, flexGrow: 1 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: appColors.background },
-  hero: { width: '100%', height: 260, borderRadius: 18 },
-  title: { fontSize: 28, fontWeight: '700', color: appColors.text },
-  favorite: { alignSelf: 'flex-start', paddingVertical: 8, paddingHorizontal: 12, borderRadius: 20, backgroundColor: '#eaf4fb' },
+  hero: { width: '100%', height: 280, borderRadius: 24, backgroundColor: appColors.softPrimary },
+  productTag: { alignSelf: 'flex-start', paddingHorizontal: 10, paddingVertical: 6, borderRadius: 20, backgroundColor: appColors.softAccent },
+  productTagText: { color: appColors.accent, fontSize: 10, fontWeight: '800', letterSpacing: 0.8 },
+  title: { fontSize: 30, lineHeight: 36, fontWeight: '800', color: appColors.text },
+  favorite: { alignSelf: 'flex-start', paddingVertical: 9, paddingHorizontal: 14, borderRadius: 20, backgroundColor: appColors.softPrimary },
   favoriteText: { color: appColors.primary, fontWeight: '700' },
-  price: { fontSize: 22, fontWeight: '700', color: appColors.primary },
+  price: { fontSize: 25, fontWeight: '800', color: appColors.primary },
   rating: { color: '#b54708', fontWeight: '600' },
   description: { color: appColors.muted, lineHeight: 22 },
-  primary: { padding: 16, borderRadius: 12, backgroundColor: appColors.primary, alignItems: 'center' },
+  primary: { padding: 17, borderRadius: 16, backgroundColor: appColors.primary, alignItems: 'center', elevation: 4, shadowColor: appColors.primary, shadowOpacity: 0.25, shadowRadius: 10, shadowOffset: { width: 0, height: 5 } },
   primaryText: { color: '#fff', fontWeight: '700' },
-  secondary: { padding: 16, borderRadius: 12, borderWidth: 1, borderColor: appColors.primary, alignItems: 'center' },
+  secondary: { padding: 16, borderRadius: 16, borderWidth: 1, borderColor: appColors.primary, alignItems: 'center', backgroundColor: appColors.surface },
   secondaryText: { color: appColors.primary, fontWeight: '700' },
   error: { color: appColors.danger },
 });
