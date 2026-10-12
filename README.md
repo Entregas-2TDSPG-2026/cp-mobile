@@ -21,6 +21,8 @@ O projeto usa Expo SDK 54, React Native 0.81.5 e Reanimated 4.
 - Checkout com seleção de ponto de retirada.
 - Pedidos exibindo o ponto escolhido.
 - Notificações locais pelo Caminho B, solicitadas no perfil.
+- Login e cadastro de cliente com sessão local.
+- Carrinho real antes do checkout, usando a variante comprável do produto.
 - Animações de toque com suporte a Reduzir Movimento.
 
 ## Dados esperados da API
@@ -39,4 +41,15 @@ Foi escolhido o Caminho B por não exigir Firebase nem development build. Ao ati
 
 - A API da turma precisa estar acessível e seguir os schemas descritos no Swagger.
 - `react-native-maps` pode exigir configuração nativa de chave em um build Android específico.
-- Login e autenticação dependem do ambiente da API; o cliente mantém os endpoints de negócio concentrados para a integração.
+- A localização da loja só aparece no mapa quando latitude e longitude são cadastradas em `/store/settings`.
+- O teste final de avaliação exige uma conta de cliente e um pedido concluído pela API.
+
+## Checklist do checkpoint
+
+- RF-35 a RF-42: produto, avaliações, `can-review`, upload opcional e invalidação implementados.
+- RF-43 a RF-48: localização, fallback, pontos, mapa nativo/fallback web e retirada implementados.
+- RF-49 a RF-55 e RF-62: mola, feedback, entrada escalonada, skeleton, remoção com layout, acessibilidade e tokens centralizados.
+- RF-56 a RF-60: notificações locais, canal Android, permissão contextual, payload, deep link e fallback implementados.
+- RF-61: identidade visual própria centralizada nos tokens do app.
+
+Antes da gravação, valide no Android com uma conta criada no app, um pedido concluído e as permissões negadas/concedidas.

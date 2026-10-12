@@ -5,8 +5,9 @@ import type {
   Product,
   PushMessage,
   Review,
-  StoreLocation,
+  Customer,
 } from './types';
+import { getSession } from '@/src/auth/session';
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL ?? 'https://api.mockmerce.com.br/v1';
 const API_KEY = process.env.EXPO_PUBLIC_API_KEY;
@@ -28,7 +29,7 @@ type ProductDetailResponse = {
   description?: string;
   rating?: { average: number; count: number };
   images?: { url?: string; src?: string }[];
-  variants?: { price?: number; active?: boolean; isDefault?: boolean; images?: { url?: string; src?: string }[] }[];
+  variants?: { id?: string; price?: number; active?: boolean; isDefault?: boolean; images?: { url?: string; src?: string }[] }[];
 };
 
 function normalizeProduct(product: ProductListResponse['data'][number] | ProductDetailResponse): Product {
@@ -42,16 +43,19 @@ function normalizeProduct(product: ProductListResponse['data'][number] | Product
     price: 'priceFrom' in product ? product.priceFrom ?? 0 : variant?.price ?? 0,
     imageUrl: 'image' in product ? product.image : image?.url ?? image?.src,
     rating: product.rating,
+    defaultVariantId: variant?.id,
   };
 }
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
-  const headers: HeadersInit = {
+  let headers: HeadersInit = {
     Accept: 'application/json',
     ...(API_KEY ? { 'X-API-Key': API_KEY } : {}),
     ...(options?.body instanceof FormData ? {} : { 'Content-Type': 'application/json' }),
     ...options?.headers,
   };
+  const session = await getSession();
+  if (session.token) headers = { ...headers, Authorization: `Bearer ${session.token}` };
 
   const response = await fetch(`${API_URL}${path}`, {
     headers,
@@ -68,7 +72,7 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
       detail = message;
     }
     if (response.status === 401) {
-      throw new Error('Autenticação ausente. Configure EXPO_PUBLIC_API_KEY no arquivo .env.');
+      throw new Error(session.token ? 'Sua sessão expirou. Entre novamente para continuar.' : 'Autenticação ausente. Configure EXPO_PUBLIC_API_KEY ou entre na sua conta.');
     }
     throw new Error(detail || `Erro ${response.status} na API`);
   }
@@ -82,6 +86,9 @@ export const api = {
     return response.data.map(normalizeProduct);
   },
   product: async (id: string) => normalizeProduct(await request<ProductDetailResponse>(`/products/${id}`)),
+  login: (payload: { email: string; password: string }) => request<{ token: string; customer: Customer }>('/auth/login', { method: 'POST', body: JSON.stringify(payload) }),
+  register: (payload: { name: string; email: string; password: string }) => request<{ token: string; customer: Customer }>('/auth/register', { method: 'POST', body: JSON.stringify(payload) }),
+  me: () => request<Customer>('/auth/me'),
   reviews: async (id: string) => {
     const response = await request<{ data: Review[] }>(`/products/${id}/reviews`);
     return response.data;
@@ -99,13 +106,29 @@ export const api = {
     }),
   pickupPoints: async (location?: { latitude: number; longitude: number }) => {
     const query = location ? `?latitude=${location.latitude}&longitude=${location.longitude}` : '';
-    const response = await request<{ data: PickupPoint[] }>(`/pickup-points${query}`);
-    return response.data;
+    const response = await request<{ data: { id: string; name: string; address?: string | Record<string, string | null>; coordinate?: { latitude: number; longitude: number }; distanceKm?: number; hours?: string }[] }>(`/pickup-points${query}`);
+    return response.data.map((point): PickupPoint => ({
+      id: point.id,
+      name: point.name,
+      address: typeof point.address === 'string' ? point.address : [point.address?.street, point.address?.number, point.address?.district, point.address?.city].filter(Boolean).join(', '),
+      latitude: point.coordinate?.latitude ?? 0,
+      longitude: point.coordinate?.longitude ?? 0,
+      distance: point.distanceKm,
+      hours: point.hours,
+    }));
   },
-  storeLocation: () => request<StoreLocation>('/store/location'),
-  checkout: (payload: { productId: string; quantity: number; pickupPointId?: string }) =>
+  storeLocation: async () => {
+    const settings = await request<{ latitude?: number; longitude?: number; storeName?: string; address?: Record<string, string> }>('/store/settings');
+    if (settings.latitude == null || settings.longitude == null) throw new Error('A loja ainda não possui localização cadastrada no painel.');
+    return { latitude: settings.latitude, longitude: settings.longitude, name: settings.storeName };
+  },
+  addToCart: (variantId: string, quantity = 1) => request('/cart/items', { method: 'POST', body: JSON.stringify({ variantId, quantity }) }),
+  checkout: (payload: { pickupPointId?: string }) =>
     request<Order>('/orders/checkout', { method: 'POST', body: JSON.stringify(payload) }),
-  orders: () => request<Order[]>('/orders'),
+  orders: async () => {
+    const response = await request<{ data?: Order[] } | Order[]>('/orders');
+    return Array.isArray(response) ? response : response.data ?? [];
+  },
   pushMessages: async () => {
     const response = await request<{ data: PushMessage[] }>('/push/messages');
     return response.data;

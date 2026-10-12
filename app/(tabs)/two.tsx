@@ -11,6 +11,7 @@ export default function AccountScreen() {
       <View style={styles.profileHero}><View style={styles.avatar}><Text style={styles.avatarText}>V</Text></View><View><Text style={styles.greeting}>Olá, visitante</Text><Text style={styles.small}>Sua experiência, do seu jeito.</Text></View></View>
       <Text style={styles.title}>Minha conta</Text>
       <Text style={styles.subtitle}>Acompanhe pedidos, avisos e preferências.</Text>
+      <Link href="/auth" asChild><PressableScale style={styles.login}><Text style={styles.loginText}>Entrar ou criar conta</Text></PressableScale></Link>
       <Link href="/orders" asChild><PressableScale style={styles.button}><Text style={styles.icon}>▣</Text><View style={styles.buttonCopy}><Text style={styles.buttonText}>Meus pedidos</Text><Text style={styles.buttonSubtext}>Acompanhe suas compras</Text></View><Text style={styles.arrow}>›</Text></PressableScale></Link>
       <Link href="/profile" asChild><PressableScale style={styles.button}><Text style={styles.icon}>✦</Text><View style={styles.buttonCopy}><Text style={styles.buttonText}>Perfil e notificações</Text><Text style={styles.buttonSubtext}>Avisos e preferências</Text></View><Text style={styles.arrow}>›</Text></PressableScale></Link>
       <Link href="/pickup" asChild><PressableScale style={styles.button}><Text style={styles.icon}>⌖</Text><View style={styles.buttonCopy}><Text style={styles.buttonText}>Pontos de retirada</Text><Text style={styles.buttonSubtext}>Encontre o mais conveniente</Text></View><Text style={styles.arrow}>›</Text></PressableScale></Link>
@@ -33,4 +34,6 @@ const styles = StyleSheet.create({
   buttonText: { color: appColors.text, fontWeight: '800', fontSize: 15 },
   buttonSubtext: { color: appColors.muted, fontSize: 12 },
   arrow: { color: appColors.primary, fontSize: 28, fontWeight: '300' },
+  login: { padding: 14, borderRadius: 14, backgroundColor: appColors.softAccent, alignItems: 'center' },
+  loginText: { color: appColors.accent, fontWeight: '800' },
 });

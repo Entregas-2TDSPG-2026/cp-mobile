@@ -11,6 +11,7 @@ export type Product = {
   imageUrl?: string;
   rating?: Rating;
   favorite?: boolean;
+  defaultVariantId?: string;
 };
 
 export type Review = {
@@ -34,6 +35,7 @@ export type PickupPoint = {
   latitude: number;
   longitude: number;
   distance?: number;
+  hours?: string;
 };
 
 export type StoreLocation = {
@@ -41,6 +43,8 @@ export type StoreLocation = {
   longitude: number;
   name?: string;
 };
+
+export type Customer = { id: string; name: string; email: string };
 
 export type Order = {
   id: string;

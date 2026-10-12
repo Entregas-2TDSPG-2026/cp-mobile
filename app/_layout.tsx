@@ -58,6 +58,7 @@ function RootLayoutNav() {
           <Stack.Screen name="pickup" options={{ title: 'Retirada' }} />
           <Stack.Screen name="orders" options={{ title: 'Pedidos' }} />
           <Stack.Screen name="profile" options={{ title: 'Perfil' }} />
+          <Stack.Screen name="auth" options={{ title: 'Acesso' }} />
           <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
         </Stack>
       </AppProvider>

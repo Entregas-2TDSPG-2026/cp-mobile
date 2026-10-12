@@ -13,7 +13,12 @@ export default function CheckoutScreen() {
   const router = useRouter();
   const [pickupPointId, setPickupPointId] = useState<string>();
   const points = useQuery({ queryKey: ['pickup-points'], queryFn: () => api.pickupPoints() });
-  const checkout = useMutation({ mutationFn: () => api.checkout({ productId, quantity: 1, pickupPointId }), onSuccess: (order) => router.replace({ pathname: '/orders', params: { created: order.id } }) });
+  const checkout = useMutation({ mutationFn: async () => {
+    const product = await api.product(productId);
+    if (!product.defaultVariantId) throw new Error('Este produto não possui uma variante comprável.');
+    await api.addToCart(product.defaultVariantId);
+    return api.checkout({ pickupPointId });
+  }, onSuccess: (order) => router.replace({ pathname: '/orders', params: { created: order.id } }) });
 
   return (
     <View style={styles.container}>
@@ -36,4 +41,6 @@ const styles = StyleSheet.create({
   primary: { padding: 16, borderRadius: 12, backgroundColor: appColors.primary, alignItems: 'center' },
   primaryText: { color: '#fff', fontWeight: '700' },
   error: { color: appColors.danger },
+  login: { padding: 14, borderRadius: 14, backgroundColor: appColors.softAccent, alignItems: 'center' },
+  loginText: { color: appColors.accent, fontWeight: '800' },
 });
