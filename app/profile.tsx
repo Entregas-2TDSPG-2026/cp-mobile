@@ -1,4 +1,3 @@
-import * as Notifications from 'expo-notifications';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Linking, StyleSheet, View } from 'react-native';
@@ -7,20 +6,25 @@ import { Text } from '@/components/Themed';
 import { api } from '@/src/api/client';
 import { PressableScale } from '@/src/components/PressableScale';
 import { appColors } from '@/src/theme/colors';
+import {
+  getNotificationPermission,
+  requestNotificationPermission,
+  scheduleStoreNotification,
+} from '@/src/services/notifications';
 
 export default function ProfileScreen() {
   const router = useRouter();
   const [status, setStatus] = useState('Não solicitado');
-  useEffect(() => { void Notifications.getPermissionsAsync().then((permission) => setStatus(permission.granted ? 'Ativadas' : 'Desativadas')); }, []);
+  useEffect(() => { void getNotificationPermission().then((permission) => setStatus(permission.granted ? 'Ativadas' : 'Desativadas')); }, []);
 
   async function enableNotifications() {
-    const permission = await Notifications.requestPermissionsAsync();
+    const permission = await requestNotificationPermission();
     setStatus(permission.granted ? 'Ativadas' : 'Negadas');
     if (!permission.granted) await Linking.openSettings();
     if (!permission.granted) return;
     try {
       const messages = await api.pushMessages();
-      await Promise.all(messages.map((message) => Notifications.scheduleNotificationAsync({ content: { title: message.title, body: message.body, data: message.data }, trigger: null })));
+      await Promise.all(messages.map(scheduleStoreNotification));
     } catch {
       setStatus('Ativadas, mas não foi possível buscar avisos');
     }
